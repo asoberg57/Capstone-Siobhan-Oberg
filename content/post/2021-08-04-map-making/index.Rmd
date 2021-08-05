@@ -1,0 +1,86 @@
+---
+title: Map Making
+author: Siobhan Oberg
+date: '2021-08-04'
+slug: map-making
+categories:
+  - Coding
+  - R
+  - Capstone
+tags:
+  - Maps
+  - Coding
+  - R
+  - Capstone
+---
+```{r}
+prelim_plot <- ggplot(less_trees, aes(x = long, y = lat, 
+    colour = park)) +
+    #xlim(7540000, 7550000)+
+    #ylim(465000, 475000)+
+    geom_point()
+prelim_plot
+```
+
+
+```{r}
+register_google(key = "AIzaSyCviLD8jQwDvBfGlLkXdyED2Y6vQUmreYk")
+```
+
+```{r}
+salem <- c(lon = -123.040283, lat = 44.944099)
+```
+
+```{r}
+map <- get_map(location = salem, zoom = 14, scale = 2)
+salem_map <- ggmap(map) + 
+  geom_point(aes(long, lat), data = tree_viz, color = alpha("grey", 0.7))
+salem_map
+```
+
+
+```{r}
+salem_map <- salem_map + 
+  ggtitle("Map of City of Salem Trees") + 
+  xlab("Longitude") + 
+  ylab("Latitude") + 
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+Highlighting just the Oregon White Oaks
+```{r}
+oregon_white_oaks <- tree_viz %>% filter(genus_species == "quercus garryana - (oregon white oak)")
+
+```
+
+```{r}
+map <- get_map(location = salem, zoom = 14, scale = 2)
+white_oak_map <- salem_map +
+  ggtitle("Map of City of Salem Trees That are Oregon White Oaks") +
+  geom_point(aes(long, lat), data = tree_viz, color = alpha("grey", 0.7)) + 
+  geom_point(aes(long, lat), data = oregon_white_oaks, color = alpha("#99ff99", 0.7))
+white_oak_map
+```
+
+Bio Diversity
+Removing species if instances less than 100
+```{r}
+bio_diversity <- tree_viz %>% 
+  group_by(genus_species) %>% 
+  filter(n() >= 100) %>%
+  filter(genus_species != "unknown")
+```
+
+
+```{r}
+table(bio_diversity$genus_species)
+```
+
+```{r}
+bio_prelim_plot <- ggplot(bio_diversity, aes(x = long, y = lat, 
+    colour = genus_species)) +
+    #xlim(7540000, 7550000)+
+    #ylim(465000, 475000)+
+    geom_point()
+bio_prelim_plot
+```

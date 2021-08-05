@@ -1,0 +1,22 @@
+---
+title: Project Proposal
+author: Siobhan Oberg
+date: '2021-08-04'
+slug: project-proposal
+categories:
+  - Capstone
+tags:
+  - R
+  - Capstone
+  - Writing
+  - Background
+---
+How can we make data science more accessible? How many peole have tried to learn how to use R or python or SQL and gave up because they were overwhelmed or didn't know where to start? I certainly know that the first time I was exposed to R, I was completely lost. Yet, there are so many disciplines where having some type of coding and data science experience is extremely useful. This is especially true in the field of biology. My goal with this project is to create a website that future biology students at Willamette can refer to as a starting point when using RStudio. This project stems from Professor David Craig's SCRP project beginning in the summer of 2021. Professor Craig's work focuses on the conservation of the habitat of the slender billed white breasted nut hatch, particularly the Oregon White Oak. My project will be the beginning of Professor Craig's team using data analysis to help conserve these trees and birds. 
+
+There are varying reports on exactly how many people know how to code or anything about data science, but in most reports, the numbers are very low. People view coding and data science as shrouded in mystery, or only available to the extremely intelligent. In reality, it can be much easier than people tend to believe, if they have the right resources. I, in fact was one of these people before beginning this program. I had previously been exposed to RStudio in an applied statistics course, and I barely got through that. Then, while I was doing genomic research, I struggled through navigating Unix and Terminal, for months, all because I didn't know where to look, or who to ask for help. Creating a resource where future Willamette Biology students and Professor Craig's future research teams can use as a starting point will help prevent others from feeling the same confusion and uncertainty that I did. 
+
+Providing this resource will allow others to 1), further the research that Professor Craig has been working on, and 2) learn practical skills that can help in their future careers and in navigating the world. It will allow for people to more throughly understand how data is used, and to decrease the learning curve when they begin using data analysis to answer questions. 
+
+I am trying to build a blog that takes people through the processes of cleaning data, exploratory data analysis, creating visualizations, and creating models with the data. I also plan on adding to this blog after the program, uploading previous projects that I have worked on and improving them and working on projects that interset me. My main focus for the project will be on creating maps of biodiversity of the trees managed and owned by the City of Salem, as of July 2020. There will be later posts about each individual step, as well as more specialized processes, such as creating a interactive Shiny app. This project will be usefull in finding areas where the biodiversity in trees is lacking, and some suggestions for increasing that biodiversity. Additionally, it will provide Professor Craig's team locations of Oregon white oaks that they can survey and conduct further research on. 
+
+In the future, we want to use LiDAR data and machine learning to create models that can accurately predict tree species. thsi can be then used to help map out traditional indigenous lands and provide researchers with more specific areas in with to conduct their research. It will also be a source for the City of Salem to look at figure out which areas in Salem need a wider variety of tree species and areas where trees need more intervention, as well as more in dpeth collection of data. 

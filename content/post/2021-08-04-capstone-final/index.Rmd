@@ -1,0 +1,71 @@
+---
+title: Capstone Final
+author: Siobhan Oberg
+date: '2021-08-04'
+slug: capstone-final
+categories:
+  - Capstone
+  - Coding
+  - R
+tags:
+  - Capstone
+  - Coding
+  - R
+  - Writing
+---
+
+```{r}
+map <- get_map(location = salem, zoom = 14, scale = 2)
+salem_map <- ggmap(map) + 
+  geom_point(aes(long, lat), data = tree_viz, color = alpha("grey", 0.7))
+salem_map
+```
+
+
+```{r}
+salem_map <- salem_map + 
+  ggtitle("Map of City of Salem Trees") + 
+  xlab("Longitude") + 
+  ylab("Latitude") + 
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+```{r}
+map <- get_map(location = salem, zoom = 14, scale = 2)
+white_oak_map <- salem_map +
+  ggtitle("Map of City of Salem Trees That are Oregon White Oaks") +
+  geom_point(aes(long, lat), data = tree_viz, color = alpha("grey", 0.7)) + 
+  geom_point(aes(long, lat), data = oregon_white_oaks, color = alpha("#99ff99", 0.7))
+white_oak_map
+```
+
+```{r}
+bio_prelim_plot <- ggplot(bio_diversity, aes(x = long, y = lat, 
+    colour = genus_species)) +
+    #xlim(7540000, 7550000)+
+    #ylim(465000, 475000)+
+    geom_point()
+bio_prelim_plot
+```
+
+```{r}
+biodiversity_map <- salem_map + 
+  ggtitle("Map of City of Salem Tree Species Above 100") +
+  geom_point(aes(long, lat), data = tree_viz, color = alpha("grey", 0.7)) + 
+  geom_point(aes(long, lat), data = bio_diversity, color = species)
+biodiversity_map
+```
+
+```{r}
+unknown_map <- salem_map +
+  ggtitle("Map of City of Salem Tree Species That are Unknown") +
+  geom_point(aes(long, lat), data = tree_viz, color = alpha("grey", 0.7)) + 
+  geom_point(aes(long, lat), data = bio_diversity, color = alpha("#99ff99", 0.7))
+unknown_map
+```
+
+
+
+
+
+

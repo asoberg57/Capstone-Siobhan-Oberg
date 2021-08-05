@@ -1,0 +1,215 @@
+---
+title: Capstone Data Cleaning
+author: Siobhan Oberg
+date: '2021-08-04'
+slug: capstone-data-cleaning
+categories:
+  - Coding
+  - R
+  - Capstone
+tags:
+  - Coding
+  - Background
+  - Capstone
+  - Cleaning
+---
+
+
+```{r data}
+salem_trees <- read_csv("/Users/asoberg/Downloads/Trees_lat_and_long.csv")
+```
+
+```{r trees}
+glimpse(salem_trees)
+```
+
+```{r pressure, echo=FALSE}
+table(salem_trees$'Planting Area Type')
+```
+
+```{r}
+table(salem_trees$'Planting Area Width in Feet')
+```
+need to average out the area width and assign that to the null values
+```{r}
+table(salem_trees$'Overhead Utilities')
+```
+Don't know what these are 
+```{r}
+table(salem_trees$'Tree Present')
+```
+hmmm, were the trees stolen? removed? 
+```{r}
+table(salem_trees$'Tree Genus/Species')
+```
+outcome variable
+
+```{r}
+table(salem_trees$Cultivar)
+```
+related to outcome variable
+
+```{r}
+table(salem_trees$'Exact DBH in Inches')
+```
+a feature to maybe help determine species diameter at breast height
+```{r}
+table(salem_trees$'Tree Health')
+```
+
+```{r}
+table(salem_trees$Topped)
+```
+top part of tree is cut off, can cause decay, cavaties, hollows
+```{r}
+table(salem_trees$Cavities)
+```
+What are cavities? are they just holes in a tree?
+```{r}
+table(salem_trees$Fungus)
+```
+good that only 72 have fungus, Not all fungi growing on your tree are harmful; some do not affect the tree at all while others are even beneficial.
+```{r}
+table(salem_trees$'Large Dead Limbs')
+```
+
+There are almost no comments, so just remove that whole column
+```{r}
+table(salem_trees$Address)
+```
+Just the street name for the most part, don't know that that would be useful, esp when I also have the lat and long
+```{r}
+table(salem_trees$Ward)
+```
+Don't know what this means
+```{r}
+table(salem_trees$UNITTYPE)
+```
+There are only 408 park trees, 10118 right of way trees, yet they're all city of salem trees?
+```{r}
+table(salem_trees$PLANTDATE)
+```
+Not sure this adds much value, why are they all planted on january first? (doubtful this is true) Can I assume the ones with null were planted before 2005?
+```{r}
+table(salem_trees$STATUS)
+```
+What? No clue what an active tree is and most of them are null anyway
+```{r}
+table(salem_trees$OWNEDBY)
+```
+all owned by city of salem parks, and I'm sure all maintained by them too (the answer is yes)
+```{r}
+table(salem_trees$PWGRID)
+```
+remove this column
+```{r}
+table(salem_trees$MEMORIALNAME)
+```
+remove this column
+```{r}
+table(salem_trees$PARK)
+```
+Majority of trees are not in parks
+```{r}
+table(salem_trees$'Planting Notes')
+```
+This will need a lot of cleaning, if I even want to use planting notes, as most are null
+and then lat and long. Might need to change lat and long class.
+
+Decided I don't want to deal with the planting notes, not super important, might be a post ofr later.
+
+```{r}
+less_trees = subset(salem_trees, select = -c(Shape, `Overhead Utilities`, PWGRID, MEMORIALNAME, Comments, Ward, UNITTYPE, OBJECTID, MAINTAINEDBY, OWNEDBY, STATUS, Cultivar, PLANTDATE, `Planting Notes`))
+```
+
+This data is suprisingly clean, there aren't different variations of the same thing(no misspellings, weird capitalizations, etc) except in a column I'm not even going to use. 
+
+I will need to transform some variables in numeric from character, create numeric categories etc, make dummies.
+
+making everything lowercase
+```{r}
+less_trees$`Planting Area Type`<- tolower(less_trees$`Planting Area Type`)
+less_trees$`Planting Area Width in Feet`<- tolower(less_trees$`Planting Area Width in Feet`)
+less_trees$`Tree Present`<- tolower(less_trees$`Tree Present`)
+less_trees$`Tree Genus/Species`<- tolower(less_trees$`Tree Genus/Species`)
+less_trees$`Exact DBH in Inches`<- tolower(less_trees$`Exact DBH in Inches`)
+less_trees$`Tree Health`<- tolower(less_trees$`Tree Health`)
+less_trees$Topped<- tolower(less_trees$Topped)
+less_trees$Cavities<- tolower(less_trees$Cavities)
+less_trees$Fungus<- tolower(less_trees$Fungus)
+less_trees$`Large Dead Limbs`<- tolower(less_trees$`Large Dead Limbs`)
+less_trees$Address<- tolower(less_trees$Address)
+less_trees$PARK<- tolower(less_trees$PARK)
+```
+
+Changing Null to NA so I can then change the the data types
+```{r}
+less_trees[less_trees == "<null>"] <- NA
+```
+
+Changing some column names
+```{r}
+names(less_trees)[names(less_trees) == "Planting Area Type"] <- "pa_type"
+names(less_trees)[names(less_trees) == "Planting Area Width in Feet"] <- "pa_width_ft"
+names(less_trees)[names(less_trees) == "Tree Present"] <- "tree_present"
+names(less_trees)[names(less_trees) == "Tree Genus/Species"] <- "genus_species"
+names(less_trees)[names(less_trees) == "Exact DBH in Inches"] <- "DBH_in"
+names(less_trees)[names(less_trees) == "Tree Health"] <- "health"
+names(less_trees)[names(less_trees) == "Topped"] <- "top"
+names(less_trees)[names(less_trees) == "Cavities"] <- "cav"
+names(less_trees)[names(less_trees) == "Fungus"] <- "fungus"
+names(less_trees)[names(less_trees) == "Large Dead Limbs"] <- "lg_dead_limbs"
+names(less_trees)[names(less_trees) == "Address"] <- "address"
+names(less_trees)[names(less_trees) == "PARK"] <- "park"
+names(less_trees)[names(less_trees) == "LATITUDE"] <- "lat"
+names(less_trees)[names(less_trees) == "LONGITUDE"] <- "long"
+```
+
+visualizing missing data
+```{r}
+aggr(less_trees, numbers = TRUE, prop = c(TRUE, FALSE))
+```
+
+Changing data types from character to numeric
+```{r}
+less_trees$pa_width_ft <- as.numeric(less_trees$pa_width_ft)
+less_trees$DBH_in <- as.numeric(less_trees$DBH_in)
+```
+
+replacing NA genus species with unknown
+```{r}
+less_trees[c("genus_species")][is.na(less_trees[c("genus_species")])] <- "unknown"
+```
+
+replacing NA pa type with unknown
+```{r}
+less_trees[c("pa_type")][is.na(less_trees[c("pa_type")])] <- "unknown"
+```
+
+Imputing pa width
+```{r}
+less_trees$pa_width_ft[is.na(less_trees$pa_width_ft)] <- mean(less_trees$pa_width_ft, na.rm=TRUE)
+```
+
+Grouping and imputing DBH
+```{r}
+aggregate(less_trees[, 5], list(less_trees$genus_species), mean)
+```
+
+```{r}
+less_trees <- less_trees %>%
+    group_by(genus_species) %>%
+    mutate(DBH_in = ifelse(is.na(DBH_in), mean(DBH_in, na.rm = TRUE), DBH_in))
+
+```
+
+basic mapping of points
+```{r}
+prelim_plot <- ggplot(less_trees, aes(x = long, y = lat, 
+    colour = park)) +
+    #xlim(7540000, 7550000)+
+    #ylim(465000, 480000)+
+    geom_point()
+prelim_plot
+```
+
