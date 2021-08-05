@@ -24,7 +24,7 @@ prelim_plot
 
 
 ```{r}
-register_google(key = "AIzaSyCviLD8jQwDvBfGlLkXdyED2Y6vQUmreYk")
+register_google(key = "your key")
 ```
 
 ```{r}
