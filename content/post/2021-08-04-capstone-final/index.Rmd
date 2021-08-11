@@ -14,6 +14,16 @@ tags:
   - Writing
 ---
 
+How can we make data science more accessible? How many peole have tried to learn how to use R or python or SQL and gave up because they were overwhelmed or didn't know where to start? I certainly know that the first time I was exposed to R, I was completely lost. Yet, there are so many disciplines where having some type of coding and data science experience is extremely useful. This is especially true in the field of biology. My goal with this project is to create a website that future biology students at Willamette can refer to as a starting point when using RStudio. This project stems from Professor David Craig's SCRP project beginning in the summer of 2021. Professor Craig's work focuses on the conservation of the habitat of the slender billed white breasted nut hatch, particularly the Oregon White Oak. My project will be the beginning of Professor Craig's team using data analysis to help conserve these trees and birds. 
+
+In the process of completing this project, my goals shifted, due to circumstances outside of my control. I had originally planned to to Use LiDAR data in combination with possible neural nets, XGBoosts and other machine learning to create a model that could accurately predict tree species and then use that to help map out the traditional lands of the Kalapuya people. Alas, that did not happen. This is something you need to be able to deal with as a data scientist, and I think a measure of a good data scientist is how they adapt to data that is exactly what they wanted, and if they can still produce intersting insights.
+
+So I decided to shift my project to creating a resource that future Willamette students can use as a way to learn how to use RStudio, and hopefully make datad science and coding more approachable. 
+
+I plan on having posts that go over various ways to clean data, how to create visualizations, how to do some basic modelling, and more. This blog will aslo serve as a starting point for Professor David Craig's further work and research using data analysis. I plan to have a series of posts about how to create a variety of different visualizations, including and not limited to various bar graphs and maps. The main visualization is of the diversity in tree species of the trees owned and managed by the City of Salem. 
+
+Even from just exploratory data visualizations and analysis, is easy to see that the most common tree species category is actually missing. I decide to impute those NAs as unknown so that they could be mapped and visualize areas where there are higher concentrations of the unknown tree species. As it turns out the area with the most unknown tree species is Downtown Salem, near River Front Park. Additionally the exploratory data analysis shows that 
+
 ```{r}
 map <- get_map(location = salem, zoom = 14, scale = 2)
 salem_map <- ggmap(map) + 

@@ -16,7 +16,7 @@ tags:
 
 
 ```{r data}
-salem_trees <- read_csv("/Users/asoberg/Downloads/Trees_lat_and_long.csv")
+salem_trees <- read_csv("/Users/asoberg/Capstone-Siobhan-Oberg/content/post/2021-08-04-capstone-data-cleaning/CSV/Trees_lat_and_long.csv")
 ```
 
 ```{r trees}
