@@ -16,7 +16,7 @@ tags:
 
 
 ```{r data}
-salem_trees <- read_csv("/Users/asoberg/Capstone-Siobhan-Oberg/content/post/2021-08-04-capstone-data-cleaning/CSV/Trees_lat_and_long.csv")
+salem_trees <- read_csv("/Users/asoberg/Downloads/Trees_lat_and_long.csv")
 ```
 
 ```{r trees}
@@ -116,7 +116,7 @@ table(salem_trees$'Planting Notes')
 This will need a lot of cleaning, if I even want to use planting notes, as most are null
 and then lat and long. Might need to change lat and long class.
 
-Decided I don't want to deal with the planting notes, not super important, might be a post ofr later.
+Decided I don't want to deal with the planting notes, not super important, might be a post for later.
 
 ```{r}
 less_trees = subset(salem_trees, select = -c(Shape, `Overhead Utilities`, PWGRID, MEMORIALNAME, Comments, Ward, UNITTYPE, OBJECTID, MAINTAINEDBY, OWNEDBY, STATUS, Cultivar, PLANTDATE, `Planting Notes`))
@@ -200,7 +200,6 @@ aggregate(less_trees[, 5], list(less_trees$genus_species), mean)
 less_trees <- less_trees %>%
     group_by(genus_species) %>%
     mutate(DBH_in = ifelse(is.na(DBH_in), mean(DBH_in, na.rm = TRUE), DBH_in))
-
 ```
 
 basic mapping of points
@@ -213,3 +212,81 @@ prelim_plot <- ggplot(less_trees, aes(x = long, y = lat,
 prelim_plot
 ```
 
+Fixing lat and long, since they are not actual latitude and longitude
+```{r}
+salem_lat_long = subset(less_trees, select = c(lat, long))
+```
+
+```{r}
+salem_lat_long <- salem_lat_long %>% 
+    st_as_sf(coords = c("long", "lat"), crs = 2913)
+salem_lat_long
+```
+
+
+```{r}
+salem_lat_long <- st_transform(salem_lat_long, "+proj=longlat +ellps=WGS84 +datum=WGS84")
+```
+
+
+```{r}
+salem_lat_long <- str_split_fixed(salem_lat_long$geometry, ", ", 2)
+```
+
+
+```{r}
+salem_lat_long <- as.data.frame(salem_lat_long)
+```
+
+```{r}
+#long
+salem_long <- subset(salem_lat_long, select = c(V1))
+salem_long <- str_replace_all(salem_lat_long$V1, "[c(]", "")
+salem_long <- as.data.frame(salem_long)
+salem_long$salem_long <- as.numeric(as.character(salem_long$salem_long))
+id_long <- rownames(salem_long)
+salem_long <- cbind(id_long=id_long, salem_long)
+```
+
+```{r}
+#lat
+salem_lat <- subset(salem_lat_long, select = c(V2))
+salem_lat <- str_replace_all(salem_lat_long$V2, "[)]", "")
+salem_lat <- as.data.frame(salem_lat)
+salem_lat$salem_lat <- as.numeric(as.character(salem_lat$salem_lat))
+id_lat <- rownames(salem_lat)
+salem_lat <- cbind(id_lat=id_lat, salem_lat)
+```
+
+rejoining
+```{r}
+less_trees$lat <- as.numeric(less_trees$lat)
+less_trees$long <- as.numeric(less_trees$long)
+less_trees1 <- merge(less_trees, salem_lat, by.x="lat", by.y="salem_lat")
+id_salem <- rownames(less_trees)
+less_trees <- cbind(id_salem=id_salem, less_trees)
+less_trees <- less_trees %>% full_join(salem_lat, by = c("id_salem" = "id_lat"))
+less_trees <- less_trees %>% full_join(salem_long, by = c("id_salem" = "id_long"))
+```
+
+Now removing the bad lat and long, as well as id
+```{r}
+less_trees = subset(less_trees, select = -c(lat, long, id_salem))
+```
+
+renaming salem_lat, salem_long
+```{r}
+names(less_trees)[names(less_trees) == "salem_lat"] <- "latitude"
+names(less_trees)[names(less_trees) == "salem_long"] <- "longitude"
+```
+
+
+Data viz Dataset
+```{r}
+tree_viz = subset(less_trees, select = c(genus_species, latitude, longitude, fungus, top, health, park, health, lg_dead_limbs))
+```
+
+Modelling Dataset
+```{r}
+tree_model = subset(less_trees, select = c(genus_species, cav, top, health, pa_type,pa_width_ft, fungus, lg_dead_limbs, DBH_in))
+```
