@@ -14,6 +14,23 @@ tags:
   - Cleaning
 ---
 
+Loading Libraries
+```{r, echo = FALSE}
+library(readr)
+library(tidyverse)
+library(dplyr)
+library(assertive)
+library(stringr)
+library(lubridate)
+library(VIM)
+library(maps)
+library(ggmap)
+library(ggplot2)  
+library(rgdal)  
+library(raster)
+library(sf)
+library(leaflet)
+```
 
 ```{r data}
 salem_trees <- read_csv("/Users/asoberg/Downloads/Trees_lat_and_long.csv")
