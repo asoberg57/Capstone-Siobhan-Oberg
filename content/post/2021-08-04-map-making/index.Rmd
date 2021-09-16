@@ -46,12 +46,8 @@ prelim_plot <- ggplot(less_trees, aes(x = long, y = lat,
 prelim_plot
 ```
 
-```{r, echo = FALSE}
-register_google(key = "AIzaSyCviLD8jQwDvBfGlLkXdyED2Y6vQUmreYk")
-```
-
 ```{r}
-# register_google(key = "your key")
+register_google(key = "your key")
 ```
 
 ```{r}
