@@ -32,52 +32,66 @@ library(sf)
 library(leaflet)
 ```
 
+This code reads in the csv file that has the data in it. You need to enter the pathway to the file so that R can find it. On my computer, the csv file is located in my Downloads folder, which is in my user account on the computer, asoberg, which is in the Users folder.
 ```{r data}
 salem_trees <- read_csv("/Users/asoberg/Downloads/Trees_lat_and_long.csv")
 ```
 
+The glimpse function gives tou a overview of your data, telling you how many rows, columns, the class of each variable, and the first few observations of each column. Though the variables are listed vertically here, the variables are actually arranged horizontally when you look at the actual data frame.
 ```{r trees}
 glimpse(salem_trees)
 ```
 
+I wanted to see a count of all the different values for most of the variables. There are a few reasons why.
+-See how many different values there are, and to get a count of how many times each value occured.
+-See if there were any missing values, to get a count of how many missing values per column.
+-See if there were any values that could be compressed into one uniform value, ie replacing a miss spelling of a word with the correct spelling to have be counted towards the correct value count.
+
+To do that, I used the table function, which requires the dataset name and the column name I am interested in. The $ is used to extract a particular column.
+
+I have notes that I wrote to myself about the columns below the table function for each column. 
 ```{r pressure, echo=FALSE}
 table(salem_trees$'Planting Area Type')
 ```
-
+Most common planting area type is planting strip between sidewalk and road.
 ```{r}
 table(salem_trees$'Planting Area Width in Feet')
 ```
-need to average out the area width and assign that to the null values
+Need to average out the area width and assign that to the null values.
+
 ```{r}
 table(salem_trees$'Overhead Utilities')
 ```
-Don't know what these are 
+Don't know what these are.
+
 ```{r}
 table(salem_trees$'Tree Present')
 ```
-hmmm, were the trees stolen? removed? 
+Hmmm, were the trees stolen? removed? 
+
 ```{r}
 table(salem_trees$'Tree Genus/Species')
 ```
-outcome variable
+Outcome variable
 
 ```{r}
 table(salem_trees$Cultivar)
 ```
-related to outcome variable
+Related to outcome variable.
 
 ```{r}
 table(salem_trees$'Exact DBH in Inches')
 ```
-a feature to maybe help determine species diameter at breast height
+A feature to maybe help determine species, means diameter at breast height.
 ```{r}
 table(salem_trees$'Tree Health')
 ```
+Only 1 in excellent health. 
 
 ```{r}
 table(salem_trees$Topped)
 ```
-top part of tree is cut off, can cause decay, cavaties, hollows
+Top part of tree is cut off, can cause decay, cavaties, hollows.
 ```{r}
 table(salem_trees$Cavities)
 ```
@@ -85,48 +99,58 @@ What are cavities? are they just holes in a tree?
 ```{r}
 table(salem_trees$Fungus)
 ```
-good that only 72 have fungus, Not all fungi growing on your tree are harmful; some do not affect the tree at all while others are even beneficial.
+Good that only 72 have fungus, not all fungi growing on your tree are harmful; some do not affect the tree at all while others are even beneficial. Maybe a trend will be revealed after mapping the trees? Is there a specific area of Salem where trees are have fungi?
+
 ```{r}
 table(salem_trees$'Large Dead Limbs')
 ```
+There are almost no comments, so just remove that whole column.
 
-There are almost no comments, so just remove that whole column
 ```{r}
 table(salem_trees$Address)
 ```
-Just the street name for the most part, don't know that that would be useful, esp when I also have the lat and long
+Just the street name for the most part, don't know that that would be useful, esp when I also have the lat and long.
+
 ```{r}
 table(salem_trees$Ward)
 ```
-Don't know what this means
+Don't know what this means.
+
 ```{r}
 table(salem_trees$UNITTYPE)
 ```
 There are only 408 park trees, 10118 right of way trees, yet they're all city of salem trees?
+
 ```{r}
 table(salem_trees$PLANTDATE)
 ```
 Not sure this adds much value, why are they all planted on january first? (doubtful this is true) Can I assume the ones with null were planted before 2005?
+
 ```{r}
 table(salem_trees$STATUS)
 ```
-What? No clue what an active tree is and most of them are null anyway
+What? No clue what an active tree is and most of them are null anyway.
+
 ```{r}
 table(salem_trees$OWNEDBY)
 ```
-all owned by city of salem parks, and I'm sure all maintained by them too (the answer is yes)
+All owned by city of salem parks, and I'm sure all maintained by them too (the answer is yes). 
+
 ```{r}
 table(salem_trees$PWGRID)
 ```
-remove this column
+Remove this column.
+
 ```{r}
 table(salem_trees$MEMORIALNAME)
 ```
-remove this column
+Remove this column.
+
 ```{r}
 table(salem_trees$PARK)
 ```
-Majority of trees are not in parks
+Majority of trees are not in parks. Leads me to believe that each park maintains their own trees.
+
 ```{r}
 table(salem_trees$'Planting Notes')
 ```
@@ -141,9 +165,33 @@ less_trees = subset(salem_trees, select = -c(Shape, `Overhead Utilities`, PWGRID
 
 This data is suprisingly clean, there aren't different variations of the same thing(no misspellings, weird capitalizations, etc) except in a column I'm not even going to use. 
 
-I will need to transform some variables in numeric from character, create numeric categories etc, make dummies.
+I will need to transform some variables in numeric from character, create numeric categories etc. 
 
-making everything lowercase
+Making column titles cleaner
+
+I want to make it easier and more efficient to type the column titles. So I fully change the column titles. 
+
+Here, I use the names function to change the names of a few columns to shorter values, as well as to remove the spaces in the column titles. Having spaces in the column titles adds complications to typing out column names. When there are spaces in column names, you need to put '' around the name, which causes R to not suggest the column names when typing them out. I use the <- to write over a value in this example. The <- assigns the the functions, values, etc after it to the value before it.
+```{r}
+names(less_trees)[names(less_trees) == "Planting Area Type"] <- "pa_type"
+names(less_trees)[names(less_trees) == "Planting Area Width in Feet"] <- "pa_width_ft"
+names(less_trees)[names(less_trees) == "Tree Present"] <- "tree_present"
+names(less_trees)[names(less_trees) == "Tree Genus/Species"] <- "genus_species"
+names(less_trees)[names(less_trees) == "Exact DBH in Inches"] <- "DBH_in"
+names(less_trees)[names(less_trees) == "Tree Health"] <- "health"
+names(less_trees)[names(less_trees) == "Topped"] <- "top"
+names(less_trees)[names(less_trees) == "Cavities"] <- "cav"
+names(less_trees)[names(less_trees) == "Fungus"] <- "fungus"
+names(less_trees)[names(less_trees) == "Large Dead Limbs"] <- "lg_dead_limbs"
+names(less_trees)[names(less_trees) == "Address"] <- "address"
+names(less_trees)[names(less_trees) == "PARK"] <- "park"
+names(less_trees)[names(less_trees) == "LATITUDE"] <- "lat"
+names(less_trees)[names(less_trees) == "LONGITUDE"] <- "long"
+```
+
+Lowering characters
+
+This bit of cleanup causes all alphabetical characters to be lower case. I use the function tolower to do this. This use of the <- applys a function to all the values in a column. 
 ```{r}
 less_trees$`Planting Area Type`<- tolower(less_trees$`Planting Area Type`)
 less_trees$`Planting Area Width in Feet`<- tolower(less_trees$`Planting Area Width in Feet`)
@@ -162,24 +210,6 @@ less_trees$PARK<- tolower(less_trees$PARK)
 Changing Null to NA so I can then change the the data types
 ```{r}
 less_trees[less_trees == "<null>"] <- NA
-```
-
-Changing some column names
-```{r}
-names(less_trees)[names(less_trees) == "Planting Area Type"] <- "pa_type"
-names(less_trees)[names(less_trees) == "Planting Area Width in Feet"] <- "pa_width_ft"
-names(less_trees)[names(less_trees) == "Tree Present"] <- "tree_present"
-names(less_trees)[names(less_trees) == "Tree Genus/Species"] <- "genus_species"
-names(less_trees)[names(less_trees) == "Exact DBH in Inches"] <- "DBH_in"
-names(less_trees)[names(less_trees) == "Tree Health"] <- "health"
-names(less_trees)[names(less_trees) == "Topped"] <- "top"
-names(less_trees)[names(less_trees) == "Cavities"] <- "cav"
-names(less_trees)[names(less_trees) == "Fungus"] <- "fungus"
-names(less_trees)[names(less_trees) == "Large Dead Limbs"] <- "lg_dead_limbs"
-names(less_trees)[names(less_trees) == "Address"] <- "address"
-names(less_trees)[names(less_trees) == "PARK"] <- "park"
-names(less_trees)[names(less_trees) == "LATITUDE"] <- "lat"
-names(less_trees)[names(less_trees) == "LONGITUDE"] <- "long"
 ```
 
 visualizing missing data
