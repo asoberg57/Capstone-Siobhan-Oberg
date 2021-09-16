@@ -13,6 +13,30 @@ tags:
   - R
   - Capstone
 ---
+
+```{r, echo = FALSE}
+library(readr)
+library(tidyverse)
+library(dplyr)
+library(assertive)
+library(stringr)
+library(lubridate)
+library(VIM)
+library(maps)
+library(ggmap)
+library(ggplot2)  
+library(rgdal)  
+library(raster)
+library(sf)
+library(leaflet)
+```
+
+```{r, echo = FALSE}
+less_trees<- read_csv("/Users/asoberg/Downloads/less_trees.csv")
+tree_viz<- read_csv("/Users/asoberg/Downloads/tree_viz.csv")
+tree_model<- read_csv("/Users/asoberg/Downloads/tree_model.csv")
+```
+
 ```{r}
 prelim_plot <- ggplot(less_trees, aes(x = long, y = lat, 
     colour = park)) +
@@ -22,9 +46,12 @@ prelim_plot <- ggplot(less_trees, aes(x = long, y = lat,
 prelim_plot
 ```
 
+```{r, echo = FALSE}
+register_google(key = "AIzaSyCviLD8jQwDvBfGlLkXdyED2Y6vQUmreYk")
+```
 
 ```{r}
-register_google(key = "your key")
+# register_google(key = "your key")
 ```
 
 ```{r}
@@ -37,7 +64,6 @@ salem_map <- ggmap(map) +
   geom_point(aes(long, lat), data = tree_viz, color = alpha("grey", 0.7))
 salem_map
 ```
-
 
 ```{r}
 salem_map <- salem_map + 

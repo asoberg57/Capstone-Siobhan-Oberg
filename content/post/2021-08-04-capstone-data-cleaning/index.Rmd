@@ -99,7 +99,7 @@ What are cavities? are they just holes in a tree?
 ```{r}
 table(salem_trees$Fungus)
 ```
-Good that only 72 have fungus, not all fungi growing on your tree are harmful; some do not affect the tree at all while others are even beneficial. Maybe a trend will be revealed after mapping the trees? Is there a specific area of Salem where trees are have fungi?
+Good that only 72 trees have fungus, not all fungi growing on your tree are harmful; some do not affect the tree at all while others are even beneficial. Maybe a trend will be revealed after mapping the trees? Is there a specific area of Salem where trees are have fungi?
 
 ```{r}
 table(salem_trees$'Large Dead Limbs')
@@ -157,15 +157,14 @@ table(salem_trees$'Planting Notes')
 This will need a lot of cleaning, if I even want to use planting notes, as most are null
 and then lat and long. Might need to change lat and long class.
 
-Decided I don't want to deal with the planting notes, not super important, might be a post for later.
+I decided I don't want to deal with the planting notes, not super important, might be a post for later.
 
+Here I am subsetting the data set into a smaller one, removing the columns I am not interested in. This does not decrease the number of observations, just the number of variables.
 ```{r}
 less_trees = subset(salem_trees, select = -c(Shape, `Overhead Utilities`, PWGRID, MEMORIALNAME, Comments, Ward, UNITTYPE, OBJECTID, MAINTAINEDBY, OWNEDBY, STATUS, Cultivar, PLANTDATE, `Planting Notes`))
 ```
 
-This data is suprisingly clean, there aren't different variations of the same thing(no misspellings, weird capitalizations, etc) except in a column I'm not even going to use. 
-
-I will need to transform some variables in numeric from character, create numeric categories etc. 
+I will say this data is suprisingly clean, there aren't different variations of the same thing (no misspellings, weird capitalizations, etc) except in a column I'm not even going to use. The majority of time spent in data science projects, whether they be making machine learning models and artificial intelligence, or creating forecasts, or most anything else, is pent on data cleaning. A lot of the data you find in the wild will require more text cleaning, and standarization of values, replacing of missing dat and more. Even though I said this data is in better condition than most, I do need to transform some variables in numeric from character, create numeric categories, streamline column titles, impute some values, make all alphabetical characters lowercase, etc. 
 
 Making column titles cleaner
 
@@ -193,98 +192,134 @@ Lowering characters
 
 This bit of cleanup causes all alphabetical characters to be lower case. I use the function tolower to do this. This use of the <- applys a function to all the values in a column. 
 ```{r}
-less_trees$`Planting Area Type`<- tolower(less_trees$`Planting Area Type`)
-less_trees$`Planting Area Width in Feet`<- tolower(less_trees$`Planting Area Width in Feet`)
-less_trees$`Tree Present`<- tolower(less_trees$`Tree Present`)
-less_trees$`Tree Genus/Species`<- tolower(less_trees$`Tree Genus/Species`)
-less_trees$`Exact DBH in Inches`<- tolower(less_trees$`Exact DBH in Inches`)
-less_trees$`Tree Health`<- tolower(less_trees$`Tree Health`)
-less_trees$Topped<- tolower(less_trees$Topped)
-less_trees$Cavities<- tolower(less_trees$Cavities)
-less_trees$Fungus<- tolower(less_trees$Fungus)
-less_trees$`Large Dead Limbs`<- tolower(less_trees$`Large Dead Limbs`)
-less_trees$Address<- tolower(less_trees$Address)
-less_trees$PARK<- tolower(less_trees$PARK)
+less_trees$pa_type<- tolower(less_trees$pa_type)
+less_trees$pa_width_ft<- tolower(less_trees$pa_width_ft)
+less_trees$tree_present<- tolower(less_trees$tree_present)
+less_trees$genus_species<- tolower(less_trees$genus_species)
+less_trees$DBH_in<- tolower(less_trees$DBH_in)
+less_trees$health<- tolower(less_trees$health)
+less_trees$top<- tolower(less_trees$top)
+less_trees$cav<- tolower(less_trees$cav)
+less_trees$fungus<- tolower(less_trees$fungus)
+less_trees$lg_dead_limbs<- tolower(less_trees$lg_dead_limbs)
+less_trees$address<- tolower(less_trees$address)
+less_trees$pARK<- tolower(less_trees$park)
 ```
 
-Changing Null to NA so I can then change the the data types
+Changing Null to NA
+
+In order to change a from one data type to another, they all need to actual values or NA. R will be angry if for instance there observations that are alphabetical characters when the rest of the observations are numbers. So i replace all instances of <null> with NA. R treats NA as a blank cell. 
 ```{r}
 less_trees[less_trees == "<null>"] <- NA
 ```
 
-visualizing missing data
+Visualizing missing data
+
+While we're on the topic of NAs (missing data), why not vizualize it?
 ```{r}
 aggr(less_trees, numbers = TRUE, prop = c(TRUE, FALSE))
 ```
+All this red doesn't look fantastic, but it is useful to be able to see it all laid out like this. This helps me determine if there are other variables that I should remove from the data set, and if there are variables that it makes sense to impute.
+
 
 Changing data types from character to numeric
+
+In order for me to impute anything, I need to change the data classes of a few columns. Specifically, the columns that need to be numeric.
 ```{r}
 less_trees$pa_width_ft <- as.numeric(less_trees$pa_width_ft)
 less_trees$DBH_in <- as.numeric(less_trees$DBH_in)
 ```
 
-replacing NA genus species with unknown
-```{r}
-less_trees[c("genus_species")][is.na(less_trees[c("genus_species")])] <- "unknown"
-```
-
-replacing NA pa type with unknown
-```{r}
-less_trees[c("pa_type")][is.na(less_trees[c("pa_type")])] <- "unknown"
-```
+Now I can replace the missing values in the pa_width and DBH columns.
 
 Imputing pa width
+
+Here, I just replace missing values with the avgerage planting area width. 
 ```{r}
 less_trees$pa_width_ft[is.na(less_trees$pa_width_ft)] <- mean(less_trees$pa_width_ft, na.rm=TRUE)
 ```
 
 Grouping and imputing DBH
+
+Imputing DBH is a little bit harder. I want a more exact mean, so I decided to replace the missing values by tree species with the mean of that tree species DBH. I do this by using the aggregate function which groups the data by the values in the fifth column(in this example), and then calculate the mean.
 ```{r}
 aggregate(less_trees[, 5], list(less_trees$genus_species), mean)
 ```
 
+I then group by the genus species column and if there is a NA value I replace it with the species average.
 ```{r}
 less_trees <- less_trees %>%
     group_by(genus_species) %>%
     mutate(DBH_in = ifelse(is.na(DBH_in), mean(DBH_in, na.rm = TRUE), DBH_in))
 ```
 
-basic mapping of points
+```{r}
+summary(less_trees)
+```
+This tells us there are still a few DBH that are NA. So I am just going to impute them as 0.
+```{r}
+less_trees$DBH_in[is.na(less_trees$DBH_in)] <- 0
+```
+
+Replacing NA genus species with unknown
+
+I want to visualize how many trees that we don't know the species of, and we can only do that by assigning a value to those missing points.
+```{r}
+less_trees[c("genus_species")][is.na(less_trees[c("genus_species")])] <- "unknown"
+```
+
+Replacing NA pa type with unknown
+
+Same reason for replacing genus species.
+```{r}
+less_trees[c("pa_type")][is.na(less_trees[c("pa_type")])] <- "unknown"
+```
+
+Basic mapping of points
+
+Right now, longitude and latitude are acting as the x and y coordinates of a graph, and so we can plot the trees as points on a graph.
 ```{r}
 prelim_plot <- ggplot(less_trees, aes(x = long, y = lat, 
     colour = park)) +
-    #xlim(7540000, 7550000)+
-    #ylim(465000, 480000)+
     geom_point()
 prelim_plot
 ```
+This graph shows all the trees managed and owned by the City of Salem. If you're familiar with the Salem geography, you can see the outline of the Willamette River that cuts Salem in half, just by the large area that has no points. 
 
-Fixing lat and long, since they are not actual latitude and longitude
+
+Fixing lat and long
+You may have noticed that the latitude and longitude are not actual latitude and longitude values, and so I need to convert them to the correct coordinates. To do this I first subset the less tress dataset into just the lat and long columns. 
 ```{r}
 salem_lat_long = subset(less_trees, select = c(lat, long))
 ```
+
+I then identify the coordinate referencing system from ArcGIS, so that in the next bit of code I can transform that CRS to a more conventional lat and long system.
 
 ```{r}
 salem_lat_long <- salem_lat_long %>% 
     st_as_sf(coords = c("long", "lat"), crs = 2913)
 salem_lat_long
 ```
-
+This CRS is the NAD83(HARN) / Oregon North (ft) CRS and I am converting to the WGS84 CRS.
 
 ```{r}
 salem_lat_long <- st_transform(salem_lat_long, "+proj=longlat +ellps=WGS84 +datum=WGS84")
 ```
+Now the two columns have been combined into one column and I need to split them. This is where the str_split_fixed function comes in. 
 
-
+I tell the function to split the string in the geometry column into 2 separate columns, at the comma between the two series of numbers.
 ```{r}
 salem_lat_long <- str_split_fixed(salem_lat_long$geometry, ", ", 2)
 ```
 
-
+I then need to convert the matrix into data frame in order to subset and remove unnecessary characters.
 ```{r}
 salem_lat_long <- as.data.frame(salem_lat_long)
 ```
 
+Longitude
+
+I subset the salem_lat_long in to salem_long and remove unnecessary characters, covnert to a data frame again, covnert the data class into numeric, and then set up a new data frame with id numbers for each longitude value, and bind the id_long to the salem_long, so that I can rejoin the salem_long to the less_trees data frame.
 ```{r}
 #long
 salem_long <- subset(salem_lat_long, select = c(V1))
@@ -295,8 +330,9 @@ id_long <- rownames(salem_long)
 salem_long <- cbind(id_long=id_long, salem_long)
 ```
 
+Latitude
+Same process as the longitude.
 ```{r}
-#lat
 salem_lat <- subset(salem_lat_long, select = c(V2))
 salem_lat <- str_replace_all(salem_lat_long$V2, "[)]", "")
 salem_lat <- as.data.frame(salem_lat)
@@ -305,29 +341,37 @@ id_lat <- rownames(salem_lat)
 salem_lat <- cbind(id_lat=id_lat, salem_lat)
 ```
 
-rejoining
+Rejoining
+I convert the latitude an longitude columns into numeric classes. I create an id column for less_trees as I did for salem_lat and salem_long. I then join the salem_lat and salem_long columns using the full_join function. 
 ```{r}
 less_trees$lat <- as.numeric(less_trees$lat)
 less_trees$long <- as.numeric(less_trees$long)
-less_trees1 <- merge(less_trees, salem_lat, by.x="lat", by.y="salem_lat")
 id_salem <- rownames(less_trees)
 less_trees <- cbind(id_salem=id_salem, less_trees)
 less_trees <- less_trees %>% full_join(salem_lat, by = c("id_salem" = "id_lat"))
 less_trees <- less_trees %>% full_join(salem_long, by = c("id_salem" = "id_long"))
 ```
 
-Now removing the bad lat and long, as well as id
+I remove the innaccurate lat and long, as well as id_salem, as they are no longer needed. 
 ```{r}
 less_trees = subset(less_trees, select = -c(lat, long, id_salem))
 ```
 
-renaming salem_lat, salem_long
+Renaming salem_lat, salem_long, just to clean it up.
 ```{r}
 names(less_trees)[names(less_trees) == "salem_lat"] <- "latitude"
 names(less_trees)[names(less_trees) == "salem_long"] <- "longitude"
 ```
 
+Quick calculation of Salem's overall Biodiversity
+```{r}
+198/(10527 - 1499)
+```
+198 is the number of different species in Salem, excluding the trees which species we don't know. Then I am dividing by the number of total trees, minus the amount that are unknown species. 
 
+0.02 is the biodiversity index, which is pretty low. 
+
+I create 2 new datasets for the visualizations I want to create, and the models I want to create. 
 Data viz Dataset
 ```{r}
 tree_viz = subset(less_trees, select = c(genus_species, latitude, longitude, fungus, top, health, park, health, lg_dead_limbs))
@@ -337,3 +381,17 @@ Modelling Dataset
 ```{r}
 tree_model = subset(less_trees, select = c(genus_species, cav, top, health, pa_type,pa_width_ft, fungus, lg_dead_limbs, DBH_in))
 ```
+
+Lastly I export these 2 dataframes  and less_trees as csv's so I can use them in other parts of the project. 
+```{r}
+write.csv(tree_viz, "/Users/asoberg/Downloads/tree_viz.csv")
+```
+
+```{r}
+write.csv(tree_model, "/Users/asoberg/Downloads/tree_model.csv")
+```
+
+```{r}
+write.csv(less_trees, "/Users/asoberg/Downloads/less_trees.csv")
+```
+
